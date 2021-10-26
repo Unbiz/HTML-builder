@@ -3,7 +3,7 @@ const fsProm = require('fs/promises');
 const path = require('path');
 
 const pathToCss = path.join(__dirname, 'styles');
-const pathToBundle = path.join(__dirname, 'bundle.css');
+const pathToBundle = path.join(__dirname, 'project-dist', 'bundle.css');
 
 async function createBundle() {
   const allFiles = await fsProm.readdir(pathToCss);
