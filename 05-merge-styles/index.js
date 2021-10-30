@@ -23,6 +23,7 @@ function streamMergeRecursive(files = [], fileWriteStream) {
 
   currentReadStream.pipe(fileWriteStream, { end: false });
   currentReadStream.on('end', function () {
+    fileWriteStream.write('\n');
     streamMergeRecursive(files, fileWriteStream);
   });
 
