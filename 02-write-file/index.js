@@ -5,11 +5,11 @@ const process = require('process');
 const input = process.stdin;
 const output = process.stdout;
 
-const needPath = path.join(__dirname, 'text.txt');
-let writeableStream = fs.createWriteStream(needPath);
+const filePath = path.join(__dirname, 'text.txt');
+let writeableStream = fs.createWriteStream(filePath);
 const rl = readline.createInterface({ input, output });
 
-rl.write('Please, input text (for quit press: "CTRL+C" or print: "exit"):\n');
+rl.write('Please, input text\n(for quit press: "CTRL+C" or print: "exit"):\n');
 
 rl.addListener('line', (input) => {
   if (input === 'exit') {
