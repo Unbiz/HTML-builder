@@ -12,6 +12,20 @@ const pathToHtmlBundle = path.join(__dirname, 'project-dist', 'index.html');
 
 let htmlFile = '';
 
+async function cleanBundleFolder(pathBundle) {
+  const files = await fsProm.readdir(pathBundle);
+
+  files.forEach(async (file) => {
+    const baseFile = path.join(pathBundle, file);
+    const stat = await fsProm.stat(baseFile);
+    if (stat.isDirectory()) {
+      await cleanBundleFolder(baseFile);
+    } else {
+      await fsProm.rm(baseFile);
+    }
+  });
+}
+
 async function createHtmlBundle() {
   const articles = await fsProm.readFile(path.join(pathToComponents, 'articles.html'));
   const footer = await fsProm.readFile(path.join(pathToComponents, 'footer.html'));
@@ -61,6 +75,7 @@ function streamMergeRecursive(files = [], fileWriteStream) {
 async function crateBuildFolder() {
   const newFolderPath = path.join(__dirname, 'project-dist');
   await fsProm.mkdir(newFolderPath, { recursive: true });
+  cleanBundleFolder(newFolderPath);
 }
 
 async function copyAssets(pathBundle, pathSource) {
