@@ -10,7 +10,7 @@ async function printFileInfo(file) {
   if (!stat.isDirectory()) {
     const ext = path.extname(file);
     const name = path.basename(file, ext);
-    const info = `${name} - ${ext.slice(1)} - ${(stat.size / 1024).toFixed(3)}kb\n`;
+    const info = `${name} - ${ext.slice(1)} - ${(stat.size / 1024)}kb\n`;
     process.stdout.write(info);
   }
 }
