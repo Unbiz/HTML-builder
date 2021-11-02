@@ -10,12 +10,10 @@ const pathToCssBundle = path.join(__dirname, 'project-dist', 'style.css');
 const pathToAssetsBundle = path.join(__dirname, 'project-dist', 'assets');
 const pathToHtmlBundle = path.join(__dirname, 'project-dist', 'index.html');
 
-let htmlFile = '';
-
 async function cleanBundleFolder(pathBundle) {
   const files = await fsProm.readdir(pathBundle);
 
-  files.forEach(async (file) => {
+  for (const file of files) {
     const baseFile = path.join(pathBundle, file);
     const stat = await fsProm.stat(baseFile);
     if (stat.isDirectory()) {
@@ -23,24 +21,22 @@ async function cleanBundleFolder(pathBundle) {
     } else {
       await fsProm.rm(baseFile);
     }
-  });
+  }
 }
 
 async function createHtmlBundle() {
-  const articles = await fsProm.readFile(path.join(pathToComponents, 'articles.html'));
-  const footer = await fsProm.readFile(path.join(pathToComponents, 'footer.html'));
-  const header = await fsProm.readFile(path.join(pathToComponents, 'header.html'));
-
+  const allFiles = await fsProm.readdir(pathToComponents);
+  const files = allFiles.filter(file => path.extname(file) === '.html');
   const readable = fs.createReadStream(pathToHtml, 'utf8');
-
-  readable.on('data', (chunk) => {
-    htmlFile = chunk.toString().replace('{{header}}', header);
-    htmlFile = htmlFile.replace('{{articles}}', articles);
-    htmlFile = htmlFile.replace('{{footer}}', footer);
-  });
-
-  readable.on('end', async () => {
-    await fsProm.writeFile(pathToHtmlBundle, htmlFile, 'utf8');
+  readable.on('data', async (htmlTemplate) => {
+    let htmlBundle = htmlTemplate.toString();
+    for (const componentName of files) {
+      const componentPath = path.join(pathToComponents, componentName);
+      const component = await fsProm.readFile(componentPath);
+      const name = path.basename(componentName, '.html');
+      htmlBundle = htmlBundle.replace(`{{${name}}}`, component);
+    }
+    await fsProm.writeFile(pathToHtmlBundle, htmlBundle, 'utf8');
   });
 }
 
@@ -57,7 +53,7 @@ function streamMergeRecursive(files = [], fileWriteStream) {
     return fileWriteStream.end();
   }
 
-  const currentFile = path.resolve(pathToCss, files.shift());
+  const currentFile = path.resolve(pathToCss, files.pop());
   const currentReadStream = fs.createReadStream(currentFile, 'utf8');
 
   currentReadStream.pipe(fileWriteStream, { end: false });
@@ -75,7 +71,6 @@ function streamMergeRecursive(files = [], fileWriteStream) {
 async function crateBuildFolder() {
   const newFolderPath = path.join(__dirname, 'project-dist');
   await fsProm.mkdir(newFolderPath, { recursive: true });
-  cleanBundleFolder(newFolderPath);
 }
 
 async function copyAssets(pathBundle, pathSource) {
@@ -96,6 +91,7 @@ async function copyAssets(pathBundle, pathSource) {
 
 async function buildPage() {
   await crateBuildFolder();
+  await cleanBundleFolder(path.join(__dirname, 'project-dist'));
   createHtmlBundle();
   createCssBundle();
   copyAssets(pathToAssetsBundle, pathToAssets);
