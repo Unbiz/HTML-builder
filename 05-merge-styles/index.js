@@ -13,24 +13,31 @@ async function createBundle() {
   streamMergeRecursive(cssFiles, stream);
 }
 
-function streamMergeRecursive(files = [], fileWriteStream) {
+async function streamMergeRecursive(files = [], fileWriteStream) {
   if (!files.length) {
     return fileWriteStream.end();
   }
 
   const currentFile = path.resolve(pathToCss, files.shift());
-  const currentReadStream = fs.createReadStream(currentFile, 'utf8');
 
-  currentReadStream.pipe(fileWriteStream, { end: false });
-  currentReadStream.on('end', function () {
-    fileWriteStream.write('\n');
+  const stat = await fsProm.stat(currentFile);
+
+  if (!stat.isDirectory()) {
+    const currentReadStream = fs.createReadStream(currentFile, 'utf8');
+
+    currentReadStream.pipe(fileWriteStream, { end: false });
+    currentReadStream.on('end', function () {
+      fileWriteStream.write('\n');
+      streamMergeRecursive(files, fileWriteStream);
+    });
+
+    currentReadStream.on('error', function (error) {
+      console.error(error);
+      fileWriteStream.close();
+    });
+  } else {
     streamMergeRecursive(files, fileWriteStream);
-  });
-
-  currentReadStream.on('error', function (error) {
-    console.error(error);
-    fileWriteStream.close();
-  });
+  }
 }
 
 createBundle();
