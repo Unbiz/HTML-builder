@@ -9,10 +9,10 @@ async function copyFolder() {
   try {
     await fsProm.access(newFolderPath, fs.constants.W_OK);
     const oldCopyFiles = await fsProm.readdir(newFolderPath);
-    oldCopyFiles.forEach(async (file) => {
+    for (const file of oldCopyFiles) {
       const pathToFile = path.join(newFolderPath, file);
-      fsProm.unlink(pathToFile);
-    });
+      await fsProm.unlink(pathToFile);
+    }
   } catch {
     await fsProm.mkdir(newFolderPath, { recursive: true });
   }
