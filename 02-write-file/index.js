@@ -11,15 +11,16 @@ const rl = readline.createInterface({ input, output });
 
 rl.write('Please, input text\n(for quit press: "CTRL+C" or print: "exit"):\n');
 
+function exitProgram() {
+  rl.write('Good Bye!');
+  process.exit(0);
+}
+
 rl.addListener('line', (input) => {
   if (input === 'exit') {
-    rl.write('Good Bye!');
-    process.exit(0);
+    exitProgram();
   }
   writeableStream.write(input + '\n');
 });
 
-rl.addListener('close', () => {
-  rl.write('Good Bye!');
-  process.exit(0);
-});
+rl.addListener('close', exitProgram);
