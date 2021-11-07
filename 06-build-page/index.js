@@ -12,7 +12,7 @@ const pathToAssetsBundle = path.join(pathToBuild, 'assets');
 const pathToHtmlBundle = path.join(pathToBuild, 'index.html');
 
 async function cleanBundleFolder(pathBundle) {
-  await fsProm.rmdir(pathBundle, { recursive: true, force: true });
+  await fsProm.rm(pathBundle, { recursive: true, force: true });
   await fsProm.mkdir(pathBundle, { recursive: true });
 }
 
